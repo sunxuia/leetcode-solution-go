@@ -22,10 +22,7 @@
 //             Note that the answer must be a substring, "pwke" is a subsequence and not a substring.
 package q003_longest_substring_without_repeating_characters
 
-import (
-	"../../util/test"
-	"testing"
-)
+import "testing"
 
 func lengthOfLongestSubstring(s string) int {
 	occupied := [128]int{}
@@ -44,12 +41,6 @@ func lengthOfLongestSubstring(s string) int {
 	}
 	return res
 }
-
-var runner = test.NewMethodTestRunner().AddTestCase(
-	test.NewMethodTestCase("abcabcbb").ExpectReturn(3)).AddTestCase(
-	test.NewMethodTestCase("bbbbb").ExpectReturn(1)).AddTestCase(
-	test.NewMethodTestCase("pwwkew").ExpectReturn(3)).AddTestCase(
-	test.NewMethodTestCase("cdd").ExpectReturn(2))
 
 func TestLengthOfLongestSubstring(t *testing.T) {
 	runner.Test(t, lengthOfLongestSubstring)
