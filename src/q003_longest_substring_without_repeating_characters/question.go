@@ -1,3 +1,4 @@
+// Package q003_longest_substring_without_repeating_characters [Medium] Longest Substring Without Repeating Characters
 // https://leetcode.com/problems/longest-substring-without-repeating-characters/
 //
 // Given a string, find the length of the longest substring without repeating characters.
@@ -22,10 +23,15 @@
 //             Note that the answer must be a substring, "pwke" is a subsequence and not a substring.
 package q003_longest_substring_without_repeating_characters
 
-import "../util/test"
+import (
+	"../util/test"
+)
 
-var runner = test.NewMethodTestRunner().AddTestCase(
-	test.NewMethodTestCase("abcabcbb").ExpectReturn(3)).AddTestCase(
-	test.NewMethodTestCase("bbbbb").ExpectReturn(1)).AddTestCase(
-	test.NewMethodTestCase("pwwkew").ExpectReturn(3)).AddTestCase(
-	test.NewMethodTestCase("cdd").ExpectReturn(2))
+var runner = func() *test.MethodTestRunner {
+	runner := test.NewMethodTestRunner().AddTestCase(
+		test.NewMethodTestCase("abcabcbb").ExpectReturn(3)).AddTestCase(
+		test.NewMethodTestCase("bbbbb").ExpectReturn(1)).AddTestCase(
+		test.NewMethodTestCase("pwwkew").ExpectReturn(3)).AddTestCase(
+		test.NewMethodTestCase("cdd").ExpectReturn(2))
+	return runner
+}()

@@ -1,0 +1,17 @@
+// Package {{ .q.PackageName }} [{{ .q.Difficulty }}] {{ .q.Title }}
+// {{ .q.URL }}
+//
+{{ .desc }}
+package {{ .q.PackageName }}
+
+import (
+	"testing"
+)
+
+type I{{ .TypeName }} interface {
+
+}
+
+func doTest(t *testing.T, obj *I{{ .TypeName }}) {
+
+}

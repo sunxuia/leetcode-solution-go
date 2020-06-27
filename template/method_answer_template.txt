@@ -1,0 +1,11 @@
+package {{ .q.PackageName }}
+
+import (
+	"testing"
+)
+
+{{ .q.Code }}
+
+func {{ .TestMethodName }}(t *testing.T) {
+	runner.Test(t, {{ .MethodName }})
+}

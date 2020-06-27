@@ -1,3 +1,4 @@
+// Package q002_add_two_numbers [Medium] Add Two Numbers
 // https://leetcode.com/problems/add-two-numbers/
 //
 // You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.
@@ -16,7 +17,10 @@ import (
 	"../util/test"
 )
 
-var runner = test.NewMethodTestRunner().AddTestCase(
-	test.NewMethodTestCase(CreateListNode(2, 4, 3), CreateListNode(5, 6, 4)).ExpectReturn(CreateListNode(7, 0, 8))).AddTestCase(
-	test.NewMethodTestCase(CreateListNode(5), CreateListNode(5)).ExpectReturn(CreateListNode(0, 1))).AddTestCase(
-	test.NewMethodTestCase(CreateListNode(1, 8), CreateListNode(0)).ExpectReturn(CreateListNode(1, 8)))
+var runner = func() *test.MethodTestRunner {
+	runner := test.NewMethodTestRunner().AddTestCase(
+		test.NewMethodTestCase(CreateListNode(2, 4, 3), CreateListNode(5, 6, 4)).ExpectReturn(CreateListNode(7, 0, 8))).AddTestCase(
+		test.NewMethodTestCase(CreateListNode(5), CreateListNode(5)).ExpectReturn(CreateListNode(0, 1))).AddTestCase(
+		test.NewMethodTestCase(CreateListNode(1, 8), CreateListNode(0)).ExpectReturn(CreateListNode(1, 8)))
+	return runner
+}()

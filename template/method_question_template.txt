@@ -1,0 +1,14 @@
+// Package {{ .q.PackageName }} [{{ .q.Difficulty }}] {{ .q.Title }}
+// {{ .q.URL }}
+//
+{{ .desc }}
+package {{ .q.PackageName }}
+
+import (
+	"../util/test"
+)
+
+var runner = func() *test.MethodTestRunner {
+	runner := test.NewMethodTestRunner()
+	return runner
+}()

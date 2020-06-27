@@ -1,6 +1,8 @@
 package q001_two_sum
 
-import "testing"
+import (
+	"testing"
+)
 
 func twoSum(nums []int, target int) []int {
 	indexes := make(map[int]int)
