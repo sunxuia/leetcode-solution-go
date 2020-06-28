@@ -24,14 +24,24 @@
 package q003_longest_substring_without_repeating_characters
 
 import (
-	"../util/test"
+	"testing"
+
+	"github.com/sunxuia/leetcode-solution-go/src/util/test"
 )
 
-var runner = func() *test.MethodTestRunner {
-	runner := test.NewMethodTestRunner().AddTestCase(
-		test.NewMethodTestCase("abcabcbb").ExpectReturn(3)).AddTestCase(
-		test.NewMethodTestCase("bbbbb").ExpectReturn(1)).AddTestCase(
-		test.NewMethodTestCase("pwwkew").ExpectReturn(3)).AddTestCase(
-		test.NewMethodTestCase("cdd").ExpectReturn(2))
-	return runner
-}()
+func doTest(t *testing.T, method func(string) int) {
+	ah := test.NewAssertHelper()
+	var res int
+
+	res = method("abcabcbb")
+	ah.Assert(3, res)
+
+	res = method("bbbbb")
+	ah.Assert(1, res)
+
+	res = method("pwwkew")
+	ah.Assert(3, res)
+
+	res = method("cdd")
+	ah.Assert(2, res)
+}

@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-{{ .q.Code }}
-
 func {{ .TestMethodName }}(t *testing.T) {
-	runner.Test(t, {{ .MethodName }})
+	doTest(t, {{ .MethodName }})
 }
+
+{{ .q.Code }}

@@ -4,9 +4,10 @@ import (
 	"testing"
 )
 
-{{ .q.Code }}
-
 func {{ .TestMethodName }}(t *testing.T) {
 	tested := new({{ .TypeName }})
 	doTest(t, tested)
 }
+
+{{ .q.Code }}
+

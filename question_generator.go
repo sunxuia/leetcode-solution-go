@@ -77,12 +77,11 @@ func getQuestion(questionID uint64) *question {
 
 	desc := question["content"].(string)
 	desc = html.UnescapeString(desc)
-	desc = regexp.MustCompile("</?[a-zA-Z]+(?: [a-zA-Z_]+=\"[^\"]+\")*>").ReplaceAllString(desc, "")
+	desc = regexp.MustCompile("</?[a-zA-Z]+(?: [a-zA-Z_]+=\"[^\"]+\")*/?>").ReplaceAllString(desc, "")
 	desc = html.UnescapeString(desc)
 	desc = strings.TrimFunc(desc, func(r rune) bool {
 		return r == ' ' || r == '\r' || r == '\n'
 	})
-	println(desc)
 	res.Text = desc
 
 	codeSnippets := reflect.ValueOf(question["codeSnippets"])
@@ -223,7 +222,7 @@ func generateFiles(q *question) {
 	dirName := "./src/" + q.PackageName
 	os.MkdirAll(dirName, os.ModePerm)
 
-	questionFile := dirName + "/question.go"
+	questionFile := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "question.go")
 	if info, _ := os.Stat(questionFile); info != nil {
 		println("question.go file exist, skip.")
 	} else if file, err := os.Create(questionFile); err != nil {
@@ -245,7 +244,7 @@ func generateFiles(q *question) {
 		}
 	}
 
-	answerFile := dirName + "/answer_test.go"
+	answerFile := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "answer_test.go")
 	if info, _ := os.Stat(answerFile); info != nil {
 		println("answer_test.go file exist, skip.")
 	} else if file, err := os.Create(answerFile); err != nil {
@@ -255,11 +254,13 @@ func generateFiles(q *question) {
 		if isClass {
 			convertTemplate(file, "class_answer_template", map[string]interface{}{
 				"q":              q,
+				"TypeName":       typeName,
 				"TestMethodName": testMethodName,
 			})
 		} else {
 			convertTemplate(file, "method_answer_template", map[string]interface{}{
 				"q":              q,
+				"MethodName":     methodName,
 				"TestMethodName": testMethodName,
 			})
 		}

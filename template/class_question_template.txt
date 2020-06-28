@@ -13,5 +13,7 @@ type I{{ .TypeName }} interface {
 }
 
 func doTest(t *testing.T, obj *I{{ .TypeName }}) {
+	ah := test.NewAssertHelper()
+	var res
 
 }

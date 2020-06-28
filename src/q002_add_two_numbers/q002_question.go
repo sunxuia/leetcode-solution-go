@@ -13,14 +13,23 @@
 package q002_add_two_numbers
 
 import (
-	. "../util/provided"
-	"../util/test"
+	"testing"
+
+	"github.com/sunxuia/leetcode-solution-go/src/util/test"
+
+	. "github.com/sunxuia/leetcode-solution-go/src/util/provided"
 )
 
-var runner = func() *test.MethodTestRunner {
-	runner := test.NewMethodTestRunner().AddTestCase(
-		test.NewMethodTestCase(CreateListNode(2, 4, 3), CreateListNode(5, 6, 4)).ExpectReturn(CreateListNode(7, 0, 8))).AddTestCase(
-		test.NewMethodTestCase(CreateListNode(5), CreateListNode(5)).ExpectReturn(CreateListNode(0, 1))).AddTestCase(
-		test.NewMethodTestCase(CreateListNode(1, 8), CreateListNode(0)).ExpectReturn(CreateListNode(1, 8)))
-	return runner
-}()
+func doTest(t *testing.T, method func(*ListNode, *ListNode) *ListNode) {
+	ah := test.NewAssertHelper()
+	var res *ListNode
+
+	res = method(CreateListNode(2, 4, 3), CreateListNode(5, 6, 4))
+	ah.Assert(CreateListNode(7, 0, 8), res)
+
+	res = method(CreateListNode(5), CreateListNode(5))
+	ah.Assert(CreateListNode(0, 1), res)
+
+	res = method(CreateListNode(1, 8), CreateListNode(0))
+	ah.Assert(CreateListNode(1, 8), res)
+}

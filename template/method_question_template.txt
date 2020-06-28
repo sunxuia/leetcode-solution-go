@@ -5,10 +5,14 @@
 package {{ .q.PackageName }}
 
 import (
-	"../util/test"
+	"testing"
+	"github.com/sunxuia/leetcode-solution-go/src/util/test"
 )
 
-var runner = func() *test.MethodTestRunner {
-	runner := test.NewMethodTestRunner()
-	return runner
-}()
+func doTest(t *testing.T, method func() ) {
+	ah := test.NewAssertHelper()
+	var res
+
+	res = method()
+	ah.Assert(, res)
+}

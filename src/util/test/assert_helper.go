@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// 断言工具
+// assertHelper 断言工具
 type assertHelper struct {
 	shouldChecks         *matchTree
 	hasOrders            *matchTree
@@ -17,8 +17,10 @@ type assertHelper struct {
 	expectTypeValidators map[string]func(string, any, any)
 	actualTypeValidators map[string]func(string, any, any)
 	numberTolerance      float64
+	times                int
 }
 
+// NewAssertHelper 断言工具构造函数
 func NewAssertHelper() *assertHelper {
 	res := &assertHelper{
 		shouldChecks: newMatchTree("root"),
@@ -46,30 +48,12 @@ func newMatchTree(key string) *matchTree {
 	return res
 }
 
-// 断言错误
-type assertError struct {
+// AssertError 断言错误
+type AssertError struct {
 	fieldName string
 	expected  any
 	actual    any
 	message   string
-}
-
-func AssertError(fieldName string, expected any, actual any) assertError {
-	return assertError{
-		fieldName,
-		expected,
-		actual,
-		"",
-	}
-}
-
-func AssertErrorWithMsg(fieldName string, expected any, actual any, message string) assertError {
-	return assertError{
-		fieldName,
-		expected,
-		actual,
-		message,
-	}
 }
 
 func setNodeValue(node *matchTree, fieldName string, value any) {
@@ -121,7 +105,7 @@ func (eh *assertHelper) FloatPrecision(tolerance float64) {
 		ev := reflect.ValueOf(expect).Float()
 		av := reflect.ValueOf(actual).Float()
 		if math.Abs(ev-av) > tolerance {
-			panic(AssertError(fieldName, ev, av))
+			panic(AssertError{fieldName, ev, av, "(float equal)"})
 		}
 	}
 	eh.expectTypeValidators["float64"] = assertMethod
@@ -132,6 +116,24 @@ func (eh *assertHelper) FloatPrecision(tolerance float64) {
 
 // 断言方法
 func (eh *assertHelper) Assert(expect any, actual any) *assertHelper {
+	eh.times++
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(AssertError); ok {
+				panic(fmt.Sprintf(`Error while validate (%dth)
+    expect: %s,
+    actual: %s,
+    detail (%s):
+        expect: %s, 
+        actual: %s, 
+        message: %s
+`, eh.times, expect, actual, e.fieldName, e.expected, e.actual, e.message))
+			} else {
+				panic(r)
+			}
+		}
+	}()
+
 	eh.assert("", expect, actual)
 	return eh
 }
@@ -175,7 +177,7 @@ func (eh *assertHelper) defaultAssertMethod(fieldName string, expect any, actual
 	// nil check
 	if expect == nil || actual == nil {
 		if expect != nil || actual != nil {
-			panic(AssertError(fieldName, expect, actual))
+			panic(AssertError{fieldName, expect, actual, "(nil check)"})
 		}
 		return
 	}
@@ -185,15 +187,7 @@ func (eh *assertHelper) defaultAssertMethod(fieldName string, expect any, actual
 	valA, okA := actual.(IEqual)
 	if okE && okA {
 		if !valE.Equal(valA) {
-			panic(AssertErrorWithMsg(fieldName, expect, actual, "(validate via Equal method)"))
-		}
-		return
-	}
-
-	// comparable
-	if comp, fail := compare(expect, actual); !fail {
-		if !comp {
-			panic(AssertError(fieldName, expect, actual))
+			panic(AssertError{fieldName, expect, actual, "(validate via Equal method)"})
 		}
 		return
 	}
@@ -222,6 +216,14 @@ func (eh *assertHelper) defaultAssertMethod(fieldName string, expect any, actual
 		return
 	}
 
+	// comparable
+	if comp, fail := compare(expect, actual); !fail {
+		if !comp {
+			panic(AssertError{fieldName, expect, actual, ""})
+		}
+		return
+	}
+
 	// default
 	panic(fmt.Sprint("Unknown type: expect ", expectType, ", actual ", actualType))
 }
@@ -245,15 +247,15 @@ func (eh *assertHelper) assertArray(fieldName string, expect any, actual any) {
 	am := arrayPattern.FindAllStringSubmatch(actualType, -1)
 	if am == nil {
 		expectType := reflect.TypeOf(expect).String()
-		panic(AssertErrorWithMsg(fieldName, expect, actual,
-			fmt.Sprintf("Expect array type %s while actual type is %s.", expectType, actualType)))
+		panic(AssertError{fieldName, expect, actual,
+			fmt.Sprintf("Expect array type %s while actual type is %s.", expectType, actualType)})
 	}
 
 	ve, va := reflect.ValueOf(expect), reflect.ValueOf(actual)
 	length, lenA := ve.Len(), va.Len()
 	if length != lenA {
-		panic(AssertErrorWithMsg(fieldName, expect, actual,
-			fmt.Sprint("Expect array length ", length, " actual length ", lenA)))
+		panic(AssertError{fieldName, expect, actual,
+			fmt.Sprint("Expect array length ", length, " actual length ", lenA)})
 	}
 
 	if hasOrder := getNodeValue(eh.hasOrders, fieldName); hasOrder.(bool) {
@@ -278,8 +280,8 @@ func (eh *assertHelper) assertArray(fieldName string, expect any, actual any) {
 				}
 			}
 			if !hasMatch {
-				panic(AssertErrorWithMsg(fieldName, expect, actual,
-					fmt.Sprint("Expect element at ", i, " cannot be found.")))
+				panic(AssertError{fieldName, expect, actual,
+					fmt.Sprint("Expect element at ", i, " cannot be found.")})
 			}
 		}
 	}
@@ -290,15 +292,14 @@ func childFieldName(fieldName string, child any) string {
 	str = strings.ReplaceAll(str, ".", "_")
 	if len(fieldName) > 0 {
 		return fieldName + "." + str
-	} else {
-		return str
 	}
+	return str
 }
 
-func (eh *assertHelper) assertWithError(fieldName string, expect any, actual any) (err *assertError) {
+func (eh *assertHelper) assertWithError(fieldName string, expect any, actual any) (err *AssertError) {
 	defer func() {
 		if r := recover(); r != nil {
-			if e, ok := r.(assertError); ok {
+			if e, ok := r.(AssertError); ok {
 				err = &e
 			} else {
 				panic(r)
@@ -316,25 +317,40 @@ func (eh *assertHelper) assertMap(fieldName string, expect any, actual any) {
 	em := mapPattern.FindAllStringSubmatch(expectType, -1)
 	am := mapPattern.FindAllStringSubmatch(actualType, -1)
 	if am == nil {
-		panic(AssertErrorWithMsg(fieldName, expect, actual,
-			fmt.Sprintf("Expect map type %s while actual type is %s.", expectType, actualType)))
+		panic(AssertError{fieldName, expect, actual,
+			fmt.Sprintf("Expect map type %s while actual type is %s.", expectType, actualType)})
 	}
 	if em[0][1] != am[0][1] {
-		panic(AssertErrorWithMsg(fieldName, expect, actual,
-			fmt.Sprintf("Map key not equal, expect type %s while actual type is %s.", expectType, actualType)))
+		panic(AssertError{fieldName, expect, actual,
+			fmt.Sprintf("Map key not equal, expect type %s while actual type is %s.", expectType, actualType)})
 	}
 
 	ev, av := reflect.ValueOf(expect), reflect.ValueOf(actual)
 	if ev.Len() != av.Len() {
-		panic(AssertErrorWithMsg(fieldName, expect, actual,
-			fmt.Sprint("map size not equal, expect ", ev.Len(), ", actual ", av.Len())))
+		panic(AssertError{fieldName, expect, actual,
+			fmt.Sprint("map size not equal, expect ", ev.Len(), ", actual ", av.Len())})
 	}
 	for it := ev.MapRange(); it.Next(); {
 		avi := av.MapIndex(it.Key())
 		if !avi.IsValid() {
-			panic(AssertErrorWithMsg(fieldName, expect, actual,
-				fmt.Sprint("Expect key ", it.Key().Interface(), " not exist.")))
+			panic(AssertError{fieldName, expect, actual,
+				fmt.Sprint("Expect key ", it.Key().Interface(), " not exist.")})
 		}
 		eh.assert(childFieldName(fieldName, it.Key().Interface()), it.Value().Interface(), avi.Interface())
 	}
+}
+
+func (eh *assertHelper) AssertInRange(actual any, expects ...any) {
+	eh.times++
+	for _, expect := range expects {
+		err := eh.assertWithError("", expect, actual)
+		if err == nil {
+			return
+		}
+	}
+
+	panic(fmt.Sprintf(`Error while validate (%dth): none of expects match actual:
+    expects: %s,
+    actual : %s,
+`, eh.times, expects, actual))
 }

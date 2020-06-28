@@ -3,16 +3,13 @@ package q002_add_two_numbers
 import (
 	"testing"
 
-	. "../util/provided"
+	. "github.com/sunxuia/leetcode-solution-go/src/util/provided"
 )
 
-/**
- * Definition for singly-linked list.
- * type ListNode struct {
- *     Val int
- *     Next *ListNode
- * }
- */
+func TestAddTwoNumbers(t *testing.T) {
+	doTest(t, addTwoNumbers)
+}
+
 func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 	dummy := new(ListNode)
 	node := dummy
@@ -36,8 +33,4 @@ func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 		node.Next = &ListNode{Val: carr}
 	}
 	return dummy.Next
-}
-
-func TestAddTwoNumbers(t *testing.T) {
-	runner.Test(t, addTwoNumbers)
 }

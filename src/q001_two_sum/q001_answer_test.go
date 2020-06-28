@@ -4,6 +4,10 @@ import (
 	"testing"
 )
 
+func TestTwoSum(t *testing.T) {
+	doTest(t, twoSum)
+}
+
 func twoSum(nums []int, target int) []int {
 	indexes := make(map[int]int)
 	for i, num := range nums {
@@ -13,8 +17,4 @@ func twoSum(nums []int, target int) []int {
 		indexes[num] = i
 	}
 	return nil
-}
-
-func TestTwoSum(t *testing.T) {
-	runner.Test(t, twoSum)
 }
