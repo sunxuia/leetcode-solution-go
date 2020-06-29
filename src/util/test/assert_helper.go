@@ -153,20 +153,24 @@ func getNodeValue(root *matchTree, fieldName string) any {
 	for _, name := range names {
 		for i := queue.Len(); i > 0; i-- {
 			val := queue.Remove(queue.Front())
-			if val != nil {
-				node := val.(*matchTree)
-				queue.PushBack(node.children[name])
-				queue.PushBack(node.children["*"])
-				queue.PushBack(node.children["**"])
-				if node.key == "**" {
-					queue.PushBack(node)
-				}
+			node := val.(*matchTree)
+			if child, ok := node.children[name]; ok {
+				queue.PushBack(child)
+			}
+			if child, ok := node.children["*"]; ok {
+				queue.PushBack(child)
+			}
+			if child, ok := node.children["**"]; ok {
+				queue.PushBack(child)
+			}
+			if node.key == "**" {
+				queue.PushBack(node)
 			}
 		}
 	}
 	for ele := queue.Front(); ele != nil; ele = ele.Next() {
 		node := ele.Value.(*matchTree)
-		if node != nil && node.setted {
+		if node.setted {
 			return node.value
 		}
 	}
