@@ -1,4 +1,4 @@
-// Package q007_reverse_integer [Easy] Reverse Integer
+// [Easy] Reverse Integer
 // https://leetcode.com/problems/reverse-integer/
 //
 // Given a 32-bit signed integer, reverse digits of an integer.
@@ -35,19 +35,23 @@ import (
 )
 
 func doTest(t *testing.T, method func(int) int) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res int
 
+	defer th.NewTestCase()()
 	res = method(123)
-	ah.Assert(321, res)
+	th.Expect(321).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method(-123)
-	ah.Assert(-321, res)
+	th.Expect(-321).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method(120)
-	ah.Assert(21, res)
+	th.Expect(21).Assert(res)
 
+	defer th.NewTestCase()()
 	// 结果超过整数范围则返回0
 	res = method(1534236469)
-	ah.Assert(0, res)
+	th.Expect(0).Assert(res)
 }

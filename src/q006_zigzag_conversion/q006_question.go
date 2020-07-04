@@ -1,4 +1,4 @@
-// Package q006_zigzag_conversion [Medium] ZigZag Conversion
+// [Medium] ZigZag Conversion
 // https://leetcode.com/problems/zigzag-conversion/
 //
 // The string "PAYPALISHIRING" is written in a zigzag pattern on a given number of rows like this: (you may want to display this pattern in a fixed font for better legibility)
@@ -43,18 +43,22 @@ import (
 )
 
 func doTest(t *testing.T, method func(string, int) string) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res string
 
+	defer th.NewTestCase()()
 	res = method("PAYPALISHIRING", 3)
-	ah.Assert("PAHNAPLSIIGYIR", res)
+	th.Expect("PAHNAPLSIIGYIR").Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("PAYPALISHIRING", 4)
-	ah.Assert("PINALSIGYAHRPI", res)
+	th.Expect("PINALSIGYAHRPI").Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("123456789", 1)
-	ah.Assert("123456789", res)
+	th.Expect("123456789").Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("", 1)
-	ah.Assert("", res)
+	th.Expect("").Assert(res)
 }

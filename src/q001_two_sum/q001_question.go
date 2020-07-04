@@ -1,4 +1,4 @@
-// Package q001_two_sum [Easy] Two Sum
+// [Easy] Two Sum
 // https://leetcode.com/problems/two-sum/
 //
 // Given an array of integers, return indices of the two numbers such that they add up to a specific target.
@@ -23,9 +23,10 @@ import (
 )
 
 func doTest(t *testing.T, method func([]int, int) []int) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res []int
 
+	defer th.NewTestCase()()
 	res = method([]int{2, 7, 11, 15}, 9)
-	ah.Assert([]int{0, 1}, res)
+	th.Expect([]int{0, 1}).Assert(res)
 }

@@ -1,4 +1,4 @@
-// Package {{ .q.PackageName }} [{{ .q.Difficulty }}] {{ .q.Title }}
+// [{{ .q.Difficulty }}] {{ .q.Title }}
 // {{ .q.URL }}
 //
 {{ .desc }}
@@ -9,10 +9,11 @@ import (
 	"github.com/sunxuia/leetcode-solution-go/src/util/test"
 )
 
-func doTest(t *testing.T, method func() ) {
-	ah := test.NewAssertHelper()
-	var res
+func doTest(t *testing.T, method {{ .Func }}) {
+	th := test.NewTestHelper(t)
+	var res {{ .ReturnType }}
 
+	defer th.NewTestCase()()
 	res = method()
-	ah.Assert(, res)
+	th.Expect().Assert(res)
 }

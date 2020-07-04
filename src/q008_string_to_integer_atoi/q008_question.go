@@ -1,4 +1,4 @@
-// Package q008_string_to_integer_atoi [Medium] String to Integer (atoi)
+// [Medium] String to Integer (atoi)
 // https://leetcode.com/problems/string-to-integer-atoi/
 //
 // Implement atoi which converts a string to an integer.
@@ -67,21 +67,26 @@ import (
 )
 
 func doTest(t *testing.T, method func(string) int) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res int
 
+	defer th.NewTestCase()()
 	res = method("42")
-	ah.Assert(42, res)
+	th.Expect(42).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("   -42")
-	ah.Assert(-42, res)
+	th.Expect(-42).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("4193 with words")
-	ah.Assert(4193, res)
+	th.Expect(4193).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("words and 987")
-	ah.Assert(0, res)
+	th.Expect(0).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("-91283472332")
-	ah.Assert(math.MinInt32, res)
+	th.Expect(math.MinInt32).Assert(res)
 }

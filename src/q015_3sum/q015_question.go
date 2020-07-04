@@ -1,4 +1,4 @@
-// Package q015_3sum [Medium] 3Sum
+// [Medium] 3Sum
 // https://leetcode.com/problems/3sum/
 //
 // Given an array nums of n integers, are there elements a, b, c in nums such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.
@@ -26,10 +26,11 @@ import (
 )
 
 func doTest(t *testing.T, method func([]int) [][]int) {
-	ah := test.NewAssertHelper()
-	ah.UnOrder("*")
+	th := test.NewTestHelper(t)
+	th.AssertConfig(test.NewAssertConfig().UnOrder("**"))
 	var res [][]int
 
+	defer th.NewTestCase()()
 	res = method([]int{-1, 0, 1, 2, -1, -4})
-	ah.Assert([][]int{{-1, 0, 1}, {-1, -1, 2}}, res)
+	th.AssertEqual([][]int{{-1, 0, 1}, {-1, -1, 2}}, res)
 }

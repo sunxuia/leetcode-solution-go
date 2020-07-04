@@ -8,4 +8,4 @@ func {{ .TestMethodName }}(t *testing.T) {
 	doTest(t, {{ .MethodName }})
 }
 
-{{ .q.Code }}
+{{ .Code }}

@@ -1,4 +1,4 @@
-// Package q013_roman_to_integer [Easy] Roman to Integer
+// [Easy] Roman to Integer
 // https://leetcode.com/problems/roman-to-integer/
 //
 // Roman numerals are represented by seven different symbols: I, V, X, L, C, D and M.
@@ -66,21 +66,26 @@ import (
 )
 
 func doTest(t *testing.T, method func(string) int) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res int
 
+	defer th.NewTestCase()()
 	res = method("III")
-	ah.Assert(3, res)
+	th.AssertEqual(3, res)
 
+	defer th.NewTestCase()()
 	res = method("IV")
-	ah.Assert(4, res)
+	th.AssertEqual(4, res)
 
+	defer th.NewTestCase()()
 	res = method("IX")
-	ah.Assert(9, res)
+	th.AssertEqual(9, res)
 
+	defer th.NewTestCase()()
 	res = method("LVIII")
-	ah.Assert(58, res)
+	th.AssertEqual(58, res)
 
+	defer th.NewTestCase()()
 	res = method("MCMXCIV")
-	ah.Assert(1994, res)
+	th.AssertEqual(1994, res)
 }

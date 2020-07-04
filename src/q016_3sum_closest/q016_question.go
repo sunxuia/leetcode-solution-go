@@ -1,4 +1,4 @@
-// Package q016_3sum_closest [Medium] 3Sum Closest
+// [Medium] 3Sum Closest
 // https://leetcode.com/problems/3sum-closest/
 //
 // Given an array nums of n integers and an integer target, find three integers in nums such that the sum is closest to target. Return the sum of the three integers. You may assume that each input would have exactly one solution.
@@ -28,9 +28,10 @@ import (
 )
 
 func doTest(t *testing.T, method func([]int, int) int) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res int
 
+	defer th.NewTestCase()()
 	res = method([]int{-1, 2, 1, -4}, 1)
-	ah.Assert(2, res)
+	th.AssertEqual(2, res)
 }

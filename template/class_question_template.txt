@@ -1,4 +1,4 @@
-// Package {{ .q.PackageName }} [{{ .q.Difficulty }}] {{ .q.Title }}
+// [{{ .q.Difficulty }}] {{ .q.Title }}
 // {{ .q.URL }}
 //
 {{ .desc }}
@@ -6,14 +6,19 @@ package {{ .q.PackageName }}
 
 import (
 	"testing"
+	"github.com/sunxuia/leetcode-solution-go/src/util/test"
 )
 
 type I{{ .TypeName }} interface {
-
+{{ range .Methods }}
+    {{ . }}
+{{ end }}
 }
 
-func doTest(t *testing.T, obj *I{{ .TypeName }}) {
-	ah := test.NewAssertHelper()
+func doTest(t *testing.T, obj I{{ .TypeName }}) {
+	th := test.NewTestHelper(t)
 	var res
+
+	defer th.NewTestCase()()
 
 }

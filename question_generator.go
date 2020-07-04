@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -36,6 +35,15 @@ type question struct {
 	PaidOnly    bool
 	Text        string
 	Code        string
+}
+
+type questionMethod struct {
+	raw        string
+	methodName string
+	returnType string
+	callerType string
+	argType    []string
+	argName    []string
 }
 
 func getQuestion(questionID uint64) *question {
@@ -203,81 +211,147 @@ func requestQuestionContent(titleSlug string) map[string]interface{} {
 }
 
 func generateFiles(q *question) {
-	var methodName, typeName, testMethodName string
-	isClass := strings.Count(q.Code, "type ") > 0 && strings.Count(q.Code, "func ") > 1
-	if isClass {
+	code, typeName, methods := handleCode(q.Code)
+	if len(typeName) > 0 {
 		fmt.Printf("%s is a class question.\n", q.Title)
-
-		typeNameMatch := regexp.MustCompile("type (.+) struct {").FindAllStringSubmatch(q.Code, -1)
-		typeName = typeNameMatch[0][1]
-		testMethodName = "Test" + typeName
+		handleClassFile(code, q, typeName, methods)
 	} else {
-		methodNameMatch := regexp.MustCompile("func (.+)\\(").FindAllStringSubmatch(q.Code, -1)
-		methodName = methodNameMatch[0][1]
-		testMethodName = "Test" + strings.ToUpper(methodName[0:1]) + methodName[1:]
+		handleMethodFile(code, q, methods[0])
+	}
+}
+
+func handleCode(code string) (string, string, []*questionMethod) {
+	code = regexp.MustCompile(`/\*[\w\W]*?\*/`).ReplaceAllString(code, "")
+	code = regexp.MustCompile(`//.+\n`).ReplaceAllString(code, "")
+	code = strings.Trim(code, "\n\t ")
+
+	var typeName string
+	structRegex := regexp.MustCompile(`type ([^ ]+) struct {`)
+	if m := structRegex.FindAllStringSubmatch(code, -1); m != nil {
+		typeName = m[0][1]
+	}
+
+	methodRegex := regexp.MustCompile(`func(?: \(([^)]+)\))? ([a-zA-Z0-9_]+)\s*\(([^)]*)\)(?: (.+))?\s*{`)
+	argRegex := regexp.MustCompile("([^ ]+) ([^ ]+)")
+	methods := make([]*questionMethod, 0)
+	if m := methodRegex.FindAllStringSubmatchIndex(code, -1); m != nil {
+		for i := 0; i < len(m); i++ {
+			qm := &questionMethod{
+				raw:        strings.Trim(code[m[i][0]:m[i][1]], " \t\n"),
+				methodName: code[m[i][4]:m[i][5]],
+				returnType: strings.Trim(code[m[i][8]:m[i][9]], " "),
+				argName:    make([]string, 0),
+				argType:    make([]string, 0),
+			}
+			if m[i][2] > -1 {
+				qm.callerType = argRegex.FindAllStringSubmatch(code[m[i][2]:m[i][3]], -1)[0][2]
+			}
+			if m[i][6] > -1 && len(code[m[i][6]:m[i][7]]) > 0 {
+				args := strings.Split(code[m[i][6]:m[i][7]], ",")
+				for _, arg := range args {
+					aMatch := argRegex.FindAllStringSubmatch(arg, -1)
+					qm.argName = append(qm.argName, aMatch[0][1])
+					qm.argType = append(qm.argType, aMatch[0][2])
+				}
+			}
+			methods = append(methods, qm)
+		}
+	}
+	return code, typeName, methods
+}
+
+func handleClassFile(code string, q *question, typeName string, methods []*questionMethod) {
+	testMethodName := "Test" + typeName
+	iMethods := make([]string, 0)
+	for _, method := range methods {
+		if len(method.callerType) > 0 {
+			callerEnd := strings.Index(method.raw, ")") + 1
+			iMethods = append(iMethods, method.raw[callerEnd:len(method.raw)-1])
+		}
 	}
 
 	desc := "// " + strings.ReplaceAll(q.Text, "\n", "\n// ")
 
 	dirName := "./src/" + q.PackageName
-	os.MkdirAll(dirName, os.ModePerm)
+	_ = os.MkdirAll(dirName, os.ModePerm)
 
-	questionFile := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "question.go")
-	if info, _ := os.Stat(questionFile); info != nil {
-		println("question.go file exist, skip.")
-	} else if file, err := os.Create(questionFile); err != nil {
-		panic(fmt.Sprint("Error while create question.go: ", err))
-	} else {
-		defer file.Close()
-		if isClass {
-			convertTemplate(file, "class_question_template", map[string]interface{}{
-				"q":        q,
-				"desc":     desc,
-				"TypeName": typeName,
-			})
-		} else {
-			convertTemplate(file, "method_question_template", map[string]interface{}{
-				"q":          q,
-				"desc":       desc,
-				"MethodName": methodName,
-			})
-		}
-	}
+	questionFileName := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "question.go")
+	outputFile(questionFileName, "class_question_template", map[string]interface{}{
+		"q":        q,
+		"desc":     desc,
+		"TypeName": typeName,
+		"Methods":  iMethods,
+	})
 
-	answerFile := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "answer_test.go")
-	if info, _ := os.Stat(answerFile); info != nil {
-		println("answer_test.go file exist, skip.")
-	} else if file, err := os.Create(answerFile); err != nil {
-		panic(fmt.Sprint("Error while create answer_test.go: ", err))
+	answerFileName := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "answer_test.go")
+	outputFile(answerFileName, "class_answer_template", map[string]interface{}{
+		"q":              q,
+		"Code":           code,
+		"TypeName":       typeName,
+		"TestMethodName": testMethodName,
+	})
+}
+
+func outputFile(fileName string, templateName string, variables map[string]interface{}) {
+	if info, _ := os.Stat(fileName); info != nil {
+		println(fileName + " file exist, skip.")
+	} else if file, err := os.Create(fileName); err != nil {
+		panic(fmt.Sprint("Error while create ", fileName, "\n", err))
 	} else {
-		defer file.Close()
-		if isClass {
-			convertTemplate(file, "class_answer_template", map[string]interface{}{
-				"q":              q,
-				"TypeName":       typeName,
-				"TestMethodName": testMethodName,
-			})
-		} else {
-			convertTemplate(file, "method_answer_template", map[string]interface{}{
-				"q":              q,
-				"MethodName":     methodName,
-				"TestMethodName": testMethodName,
-			})
+		defer func() {
+			_ = file.Close()
+		}()
+		filePath := "./template/" + templateName + ".txt"
+		bs, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			panic(fmt.Sprint("Error while read tempalte ", templateName, " : ", err))
 		}
+		str := string(bs)
+
+		tmpl, err := template.New("test").Parse(str)
+		if err != nil {
+			panic(err)
+		}
+		_ = tmpl.Execute(file, variables)
 	}
 }
 
-func convertTemplate(writer io.Writer, templateName string, variables map[string]interface{}) {
-	filePath := "./template/" + templateName + ".txt"
-	bs, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		panic(fmt.Sprint("Error while read tempalte ", templateName, " : ", err))
-	}
-	str := string(bs)
+func handleMethodFile(code string, q *question, method *questionMethod) {
+	testMethodName := "Test" + strings.ToUpper(method.methodName[0:1]) + method.methodName[1:]
 
-	tmpl, err := template.New("test").Parse(str)
-	if err != nil {
-		panic(err)
+	funcSb := strings.Builder{}
+	funcSb.WriteString("func (")
+	for i, t := range method.argType {
+		if i > 0 {
+			funcSb.WriteString(", ")
+		}
+		funcSb.WriteString(t)
 	}
-	tmpl.Execute(writer, variables)
+	funcSb.WriteString(")")
+	if len(method.returnType) > 0 {
+		funcSb.WriteString(" ")
+		funcSb.WriteString(method.returnType)
+	}
+
+	desc := "// " + strings.ReplaceAll(q.Text, "\n", "\n// ")
+
+	dirName := "./src/" + q.PackageName
+	_ = os.MkdirAll(dirName, os.ModePerm)
+
+	questionFileName := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "question.go")
+	outputFile(questionFileName, "method_question_template", map[string]interface{}{
+		"q":          q,
+		"desc":       desc,
+		"MethodName": method.methodName,
+		"ReturnType": method.returnType,
+		"Func":       funcSb.String(),
+	})
+
+	answerFileName := fmt.Sprintf("%s/q%03d_%s", dirName, q.ID, "answer_test.go")
+	outputFile(answerFileName, "method_answer_template", map[string]interface{}{
+		"q":              q,
+		"Code":           code,
+		"MethodName":     method.methodName,
+		"TestMethodName": testMethodName,
+	})
 }

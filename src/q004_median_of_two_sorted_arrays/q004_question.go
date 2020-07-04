@@ -1,4 +1,4 @@
-// Package q004_median_of_two_sorted_arrays [Hard] Median of Two Sorted Arrays
+// [Hard] Median of Two Sorted Arrays
 // https://leetcode.com/problems/median-of-two-sorted-arrays/
 //
 // There are two sorted arrays nums1 and nums2 of size m and n respectively.
@@ -32,12 +32,14 @@ import (
 )
 
 func doTest(t *testing.T, method func([]int, []int) float64) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res float64
 
+	defer th.NewTestCase()()
 	res = method([]int{1, 3}, []int{2})
-	ah.Assert(2.0, res)
+	th.Expect(2.0).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method([]int{1, 2}, []int{3, 4})
-	ah.Assert(2.5, res)
+	th.Expect(2.5).Assert(res)
 }

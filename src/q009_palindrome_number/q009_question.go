@@ -1,4 +1,4 @@
-// Package q009_palindrome_number [Easy] Palindrome Number
+// [Easy] Palindrome Number
 // https://leetcode.com/problems/palindrome-number/
 //
 // Determine whether an integer is a palindrome. An integer is a palindrome when it reads the same backward as forward.
@@ -38,15 +38,18 @@ import (
 )
 
 func doTest(t *testing.T, method func(int) bool) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res bool
 
+	defer th.NewTestCase()()
 	res = method(121)
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method(-121)
-	ah.Assert(false, res)
+	th.AssertEqual(false, res)
 
+	defer th.NewTestCase()()
 	res = method(10)
-	ah.Assert(false, res)
+	th.AssertEqual(false, res)
 }

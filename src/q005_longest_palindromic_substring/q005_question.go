@@ -1,4 +1,4 @@
-// Package q005_longest_palindromic_substring [Medium] Longest Palindromic Substring
+// [Medium] Longest Palindromic Substring
 // https://leetcode.com/problems/longest-palindromic-substring/
 //
 // Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.
@@ -25,12 +25,14 @@ import (
 )
 
 func doTest(t *testing.T, method func(string) string) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res string
 
+	defer th.NewTestCase()()
 	res = method("babad")
-	ah.AssertInRange(res, "aba", "bab")
+	th.Expect("aba").OrExpect("bab").Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("cbbd")
-	ah.Assert("bb", res)
+	th.Expect("bb").Assert(res)
 }

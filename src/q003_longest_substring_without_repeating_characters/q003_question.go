@@ -1,4 +1,4 @@
-// Package q003_longest_substring_without_repeating_characters [Medium] Longest Substring Without Repeating Characters
+// [Medium] Longest Substring Without Repeating Characters
 // https://leetcode.com/problems/longest-substring-without-repeating-characters/
 //
 // Given a string, find the length of the longest substring without repeating characters.
@@ -30,18 +30,22 @@ import (
 )
 
 func doTest(t *testing.T, method func(string) int) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res int
 
+	defer th.NewTestCase()()
 	res = method("abcabcbb")
-	ah.Assert(3, res)
+	th.Expect(3).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("bbbbb")
-	ah.Assert(1, res)
+	th.Expect(1).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("pwwkew")
-	ah.Assert(3, res)
+	th.Expect(3).Assert(res)
 
+	defer th.NewTestCase()()
 	res = method("cdd")
-	ah.Assert(2, res)
+	th.Expect(2).Assert(res)
 }

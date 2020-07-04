@@ -5,9 +5,8 @@ import (
 )
 
 func {{ .TestMethodName }}(t *testing.T) {
-	tested := new({{ .TypeName }})
+	tested := &{{ .TypeName }}{}
 	doTest(t, tested)
 }
 
-{{ .q.Code }}
-
+{{ .Code }}

@@ -1,4 +1,4 @@
-// Package q010_regular_expression_matching [Hard] Regular Expression Matching
+// [Hard] Regular Expression Matching
 // https://leetcode.com/problems/regular-expression-matching/
 //
 // Given an input string (s) and a pattern (p), implement regular expression matching with support for '.' and '*'.
@@ -73,39 +73,50 @@ import (
 )
 
 func doTest(t *testing.T, method func(string, string) bool) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res bool
 
+	defer th.NewTestCase()()
 	res = method("aa", "a")
-	ah.Assert(false, res)
+	th.AssertEqual(false, res)
 
+	defer th.NewTestCase()()
 	res = method("aa", "a*")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("ab", ".*")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("aab", "c*a*b")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("mississippi", "mis*is*p*.")
-	ah.Assert(false, res)
+	th.AssertEqual(false, res)
 
+	defer th.NewTestCase()()
 	res = method("aaa", "ab*a*c*a")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("a", "ab*")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("abcdede", "ab.*de")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("", "c*c*")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("aaca", "ab*a*c*a")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 
+	defer th.NewTestCase()()
 	res = method("cbaacacaaccbaabcb", "c*b*b*.*ac*.*bc*a*")
-	ah.Assert(true, res)
+	th.AssertEqual(true, res)
 }

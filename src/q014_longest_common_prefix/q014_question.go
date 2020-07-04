@@ -1,4 +1,4 @@
-// Package q014_longest_common_prefix [Easy] Longest Common Prefix
+// [Easy] Longest Common Prefix
 // https://leetcode.com/problems/longest-common-prefix/
 //
 // Write a function to find the longest common prefix string amongst an array of strings.
@@ -32,18 +32,22 @@ import (
 )
 
 func doTest(t *testing.T, method func([]string) string) {
-	ah := test.NewAssertHelper()
+	th := test.NewTestHelper(t)
 	var res string
 
+	defer th.NewTestCase()()
 	res = method([]string{"flower", "flow", "flight"})
-	ah.Assert("fl", res)
+	th.AssertEqual("fl", res)
 
+	defer th.NewTestCase()()
 	res = method([]string{"dog", "racecar", "car"})
-	ah.Assert("", res)
+	th.AssertEqual("", res)
 
+	defer th.NewTestCase()()
 	res = method([]string{"a"})
-	ah.Assert("a", res)
+	th.AssertEqual("a", res)
 
+	defer th.NewTestCase()()
 	res = method([]string{"a", "ac"})
-	ah.Assert("a", res)
+	th.AssertEqual("a", res)
 }
