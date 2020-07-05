@@ -160,3 +160,24 @@ func AssertStruct(handler *Handler) {
 		}
 	}
 }
+
+func GetAssertArrayRange(start *int, end *int) func(*Handler) {
+	return func(h *Handler) {
+		eLen, aLen := h.Ev.Len(), h.Av.Len()
+		if *start < 0 || *start > *end {
+			h.Error(fmt.Sprintf("Check range [%d, %d] invalid.", *start, *end))
+		}
+		if eLen <= *end || aLen <= *end {
+			h.Error(fmt.Sprintf(
+				"Expect len %d, actual len %d, exceed check range [%d, %d].", eLen, aLen, *start, *end))
+		}
+		for i := *start; i <= *end; i++ {
+			cev, cav := h.Ev.Index(i).Interface(), h.Av.Index(i).Interface()
+			child := h.Child(strconv.Itoa(i), cev, cav)
+			err := child.AssertWithError()
+			if err != nil {
+				h.Error(fmt.Sprint("Element not equal at index ", i, " : ", err))
+			}
+		}
+	}
+}
