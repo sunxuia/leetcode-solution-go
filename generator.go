@@ -320,7 +320,7 @@ func handleMethodFile(code string, q *question, method *questionMethod) {
 	testMethodName := "Test" + strings.ToUpper(method.methodName[0:1]) + method.methodName[1:]
 
 	funcSb := strings.Builder{}
-	funcSb.WriteString("func (")
+	funcSb.WriteString("func(")
 	for i, t := range method.argType {
 		if i > 0 {
 			funcSb.WriteString(", ")
