@@ -5,8 +5,8 @@
 package {{ .q.PackageName }}
 
 import (
-	"testing"
 	"github.com/sunxuia/leetcode-solution-go/src/util/test"
+	"testing"
 )
 
 type I{{ .TypeName }} interface {

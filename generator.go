@@ -304,7 +304,7 @@ func outputFile(fileName string, templateName string, variables map[string]inter
 		filePath := "./template/" + templateName + ".txt"
 		bs, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			panic(fmt.Sprint("Error while read tempalte ", templateName, " : ", err))
+			panic(fmt.Sprint("Error while read template ", templateName, " : ", err))
 		}
 		str := string(bs)
 
